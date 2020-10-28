@@ -1,9 +1,9 @@
 import numpy as np
-from transformations import rotate_x,rotate_y,rotate_z,translation
+import transformations as t
 
 class Camera:
     
-    def __init__(self,Ox,Oy,Sx,Sy,Steta,f,Xw,Yw,Zw,Mcw):
+    def __init__(self,Ox,Oy,Sx,Sy,Steta,f,Xw,Yw,Zw,Mwc):
         self.Ox = Ox
         self.Oy = Oy
         self.Sx = Sx
@@ -13,7 +13,7 @@ class Camera:
         self.Xw = Xw
         self.Yw = Yw
         self.Zw = Zw
-        self.Mcw = Mcw
+        self.Mwc = Mwc
 
     def get_intrinsic_matrix(self):
         
@@ -53,10 +53,47 @@ class Camera:
         self.Yw = P[1]
         self.Zw = P[2]
 
-    def get_Mcw(self):
-        return self.Mcw
+    def rotate_x(self,teta,degree=True):
+        R = t.rotate_x(teta,degree)
+        new_position = R @ self.get_position()
+        self.set_position(new_position)
+        self.Mwc = self.Mwc @ np.inv(R)
 
-    
+    def rotate_y(self,teta,degree=True):
+        R = t.rotate_y(teta,degree)
+        new_position = R @ self.get_position()
+        self.set_position(new_position)
+        self.Mwc = self.Mwc @ np.inv(R)
 
-        
+    def rotate_z(self,teta,degree=True):
+        R = t.rotate_z(teta,degree)
+        new_position = R @ self.get_position()
+        self.set_position(new_position)
+        self.Mwc = self.Mwc @ np.inv(R)
+
+    def rotate_x_own(self,teta,degree=True):
+        R = t.rotate_x(teta,degree)
+        self.Mwc = R @ self.Mwc
+
+    def rotate_y_own(self,teta,degree=True):
+        R = t.rotate_y(teta,degree)
+        self.Mwc = R @ self.Mwc
+
+    def rotate_z_own(self,teta,degree=True):
+        R = t.rotate_z(teta,degree)
+        self.Mwc = R @ self.Mwc
+
+    def translate(self,dx,dy,dz):
+        T = t.translation(dx,dy,dz)
+        new_position = T @ self.get_position()
+        self.set_position(new_position)
+        self.Mwc = np.inv(T) @ self.Mwc 
+
+    def translate_own(self,dx,dy,dz):
+        T = t.translation(dx,dy,dz)
+        position_in_camera_frame = np.inv(self.Mwc) @ self.get_position()
+        new_position_in_camera_frame = T @ position_in_camera_frame
+        new_position = self.Mwc @ new_position_in_camera_frame
+        self.set_position(new_position)
+        self.Mwc = self.Mwc @ np.inv(T)
 
