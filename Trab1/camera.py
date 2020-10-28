@@ -2,7 +2,7 @@ import numpy as np
 import transformations as t
 
 class Camera:
-    
+    #O iii
     def __init__(self,Ox,Oy,Sx,Sy,Steta,f,Xw,Yw,Zw,Mwc):
         self.Ox = Ox
         self.Oy = Oy
