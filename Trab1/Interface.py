@@ -36,10 +36,14 @@ label_fc = Label(menu_principal, text = "Distância focal")
 label_fc.place(x=0.64*largura, y=0.02*altura)
 
 label_sx = Label(menu_principal, text = "Sx")
-label_sx.place(x=0.74*largura-1, y=0.02*altura)
+label_sx.place(x=0.733*largura, y=0.02*altura)
 
 label_sy = Label(menu_principal, text = "Sy")
-label_sy.place(x=0.81*largura-1, y=0.02*altura)
+label_sy.place(x=0.803*largura, y=0.02*altura)
+
+label_st = Label(menu_principal, text = "Steta")
+label_st.place(x=0.866*largura, y=0.02*altura)
+
 
 # Buttons
 
@@ -123,16 +127,41 @@ slide_sx.place(x=0.71*largura, y=0.1*altura)
 Sy = DoubleVar(value=1)
 slide_sy = Scale(menu_principal, from_=10, to=0, orient = VERTICAL, resolution = 0.1, variable = Sy)
 slide_sy.place(x=0.78*largura, y=0.1*altura)
+Steta = DoubleVar(value=1)
+slide_st = Scale(menu_principal, from_=10, to=0, orient = VERTICAL, resolution = 0.1, variable = Steta)
+slide_st.place(x=0.85*largura, y=0.1*altura)
 
 # Creating a separate 3D figure
 fig0 = plt.figure()
 ax0 = plt.axes(projection='3d')
+ax0.set_xlim([-5,5])
+ax0.set_ylim([-5,5])
+ax0.set_zlim([0,10])
+e1m = np.array([1,0,0])  # eixos do referencial mundo
+e2m = np.array([0,1,0])
+e3m = np.array([0,0,1])
+e1o = np.array([1,0,0])  # eixos do referencial objeto
+e2o = np.array([0,1,0])
+e3o = np.array([0,0,1])
+Xo = 0
+Yo = 3
+Zo = 6
+ax0.quiver(0,0,0,e1m[0],e1m[1],e1m[2],color='red',pivot='tail',length=3)
+ax0.quiver(0,0,0,e2m[0],e2m[1],e2m[2],color='green',pivot='tail',length=3)
+ax0.quiver(0,0,0,e3m[0],e3m[1],e3m[2],color='blue',pivot='tail',length=3)
+ax0.quiver(Xo,Yo,Zo,e1o[0],e1o[1],e1o[2],color='red',pivot='tail',length=3)
+ax0.quiver(Xo,Yo,Zo,e2o[0],e2o[1],e2o[2],color='green',pivot='tail',length=3)
+ax0.quiver(Xo,Yo,Zo,e3o[0],e3o[1],e3o[2],color='blue',pivot='tail',length=3)
 
 # Creating a separate 2D figure
 fig1 = plt.figure()
 ax1 = plt.axes()
 ax1.grid()
 ax1.set_aspect('equal')
+ax1.set_xlim([-5,5])
+ax1.set_ylim([-5,5])
+#ax1.quiver(0,0,1,0,color='red',pivot='tail')
+#ax1.quiver(0,0,0,1,color='green',pivot='tail')
 
 # Plot
 
