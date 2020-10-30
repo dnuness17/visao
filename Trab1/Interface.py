@@ -4,6 +4,9 @@ from tkinter import *
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from mpl_toolkits.mplot3d import Axes3D 
+import transformations as t
+from camera import Camera
+from object import Object
 
 # Settings da janela de trabalho
 menu_principal = Tk()
@@ -15,6 +18,63 @@ altura = 0.8*altura_screen
 posx = largura_screen/2 - largura/2
 posy = altura_screen/2 - altura/2 - 0.05*altura_screen
 menu_principal.geometry("%dx%d+%d+%d" % (largura,altura, posx, posy))
+
+# Criando objeto (casa)
+
+house = np.array([[0,         0,         0],
+         [6,  -10.0000,         0],
+         [6, -10.0000,   12.0000],
+         [6,  -10.4000,   11.5000],
+         [6,   -5.0000,   16.0000],
+         [6,         0,   12.0000],
+         [6,    0.5000,   11.4000],
+         [6,         0,   12.0000],
+         [6,         0,         0],
+  [-6.0000,         0,         0],
+  [-6.0000,   -5.0000,         0],
+  [-6.0000,  -10.0000,         0],
+         [6,  -10.0000,         0],
+         [6,  -10.0000,   12.0000],
+[-6.0000,  -10.0000,   12.0000],
+  [-6.0000,         0,   12.0000],
+         [6,         0,   12.0000],
+         [6,  -10.0000,   12.0000],
+         [6,  -10.5000,   11.4000],
+  [-6.0000,  -10.5000,   11.4000],
+  [-6.0000,  -10.0000,   12.0000],
+  [-6.0000,   -5.0000,   16.0000],
+         [6,   -5.0000,   16.0000],
+         [6,    0.5000,   11.4000],
+  [-6.0000,    0.5000,   11.4000],
+  [-6.0000,         0,   12.0000],
+  [-6.0000,   -5.0000,   16.0000],
+  [-6.0000,  -10.0000,   12.0000],
+  [-6.0000,  -10.0000,         0],
+  [-6.0000,   -5.0000,         0],
+  [-6.0000,         0,         0],
+  [-6.0000,         0,   12.0000],
+  [-6.0000,         0,         0]])
+
+house = np.transpose(house/12)
+
+#Representing the object in homogeneous coordinates
+#create row of ones
+num_columns = np.size(house,1)
+ones_line = np.ones(num_columns)
+
+
+#add to the house matrix to represent the house in homogeneous coordinates
+house = np.vstack([house, ones_line])
+
+# Transladar a casa para cima
+
+aux_house = t.translation(0,-0.4375,4)
+house = Object(0,-0.4375,4,np.linalg.inv(aux_house),aux_house@house)
+
+# Criando camera
+
+global camera
+camera = Camera(0,0,1,1,0,1,0,0,0,np.eye(4))
 
 # Labels
 label_ref = Label(menu_principal, text = "Referêncial:")
@@ -47,10 +107,60 @@ label_st.place(x=0.866*largura, y=0.02*altura)
 
 # Buttons
 
-transladar = Button(menu_principal, text = "Transladar  :", relief = "raised")
+def transladar_action():
+    if check_x_var == 1:
+        vetor = np.array([valor_T,0,0])
+    if check_y_var == 1:
+        vetor = np.array([0,valor_T,0])
+    if check_z_var == 1:
+        vetor = np.array([0,0,valor_T])        
+    if check_camera_var == 1:
+        if check_ambiente_var == 1:
+            camera.translate(vetor[0],vetor[1],vetor[2])
+        if check_propria_var == 1:
+            camera.translate_own(vetor[0],vetor[1],vetor[2])    
+    if check_objeto_var == 1:
+        if check_objeto_var == 1:
+            house.translate(vetor[0],vetor[1],vetor[2])
+        if check_propria_var == 1:
+            house.translate_own(vetor[0],vetor[1],vetor[2])        
+
+transladar = Button(menu_principal, text = "Transladar  :", relief = "raised", command = transladar_action)
 transladar.place(x=0.3*largura, y=0.07*altura)
 
-rotacionar = Button(menu_principal, text = "Rotacionar :", relief = "raised")
+def rotacionar_action():      
+    if check_camera_var == 1:
+        if check_ambiente_var == 1:
+            if check_x_var == 1:
+                camera.rotate_x(valor_R)
+            if check_y_var == 1:
+                camera.rotate_y(valor_R)
+            if check_z_var == 1:
+                camera.rotate_z(valor_R)    
+        if check_propria_var == 1:
+            if check_x_var == 1:
+                camera.rotate_x_own(valor_R)
+            if check_y_var == 1:
+                camera.rotate_y_own(valor_R)
+            if check_z_var == 1:
+                camera.rotate_z_own(valor_R)   
+    if check_objeto_var == 1:
+        if check_ambiente_var == 1:
+            if check_x_var == 1:
+                house.rotate_x(valor_R)
+            if check_y_var == 1:
+                house.rotate_y(valor_R)
+            if check_z_var == 1:
+                house.rotate_z(valor_R)    
+        if check_propria_var == 1:
+            if check_x_var == 1:
+                house.rotate_x_own(valor_R)
+            if check_y_var == 1:
+                house.rotate_y_own(valor_R)
+            if check_z_var == 1:
+                house.rotate_z_own(valor_R)   
+
+rotacionar = Button(menu_principal, text = "Rotacionar :", relief = "raised", command = rotacionar_action)
 rotacionar.place(x=0.3*largura, y=0.17*altura)
 
 # Check boxs
@@ -112,24 +222,49 @@ valor_rotacionar = Entry(menu_principal, width = round(0.01*largura), textvariab
 valor_rotacionar.place(x=0.3*largura, y=0.22*altura)
 
 # Escorrega
-Ox = DoubleVar(value=0)
-slide_ox = Scale(menu_principal, from_=1, to=-1, orient = VERTICAL, resolution = 0.1, variable = Ox)
+def ativar_Ox(Ox):
+    global camera
+    camera.Ox = Ox
+Ox = DoubleVar(value=camera.Ox)
+slide_ox = Scale(menu_principal, from_=1, to=-1, orient = VERTICAL, resolution = 0.1, variable = Ox, command = ativar_Ox)
 slide_ox.place(x=0.50*largura, y=0.1*altura)
-Oy = DoubleVar(value=0)
-slide_oy = Scale(menu_principal, from_=1, to=-1, orient = VERTICAL, resolution = 0.1, variable = Oy)
+
+def ativar_Oy(Oy):
+    global camera
+    camera.Oy = Oy
+Oy = DoubleVar(value=camera.Oy)
+slide_oy = Scale(menu_principal, from_=1, to=-1, orient = VERTICAL, resolution = 0.1, variable = Oy, command = ativar_Oy)
 slide_oy.place(x=0.57*largura, y=0.1*altura)
-Fc = DoubleVar(value=1)
-slide_fc = Scale(menu_principal, from_=100, to=1, orient = VERTICAL, resolution = 0.1, variable = Fc)
+
+def ativar_Fc(Fc):
+    global camera
+    camera.f = Fc
+Fc = DoubleVar(value=camera.f)
+slide_fc = Scale(menu_principal, from_=100, to=1, orient = VERTICAL, resolution = 0.1, variable = Fc, command = ativar_Fc)
 slide_fc.place(x=0.64*largura, y=0.1*altura)
+
+def ativar_Sx(Sx):
+    global camera
+    camera.Sx = Sx
 Sx = DoubleVar(value=1)
-slide_sx = Scale(menu_principal, from_=10, to=0, orient = VERTICAL, resolution = 0.1, variable = Sx)
+slide_sx = Scale(menu_principal, from_=10, to=0, orient = VERTICAL, resolution = 0.1, variable = Sx, command = ativar_Sx)
 slide_sx.place(x=0.71*largura, y=0.1*altura)
+
+def ativar_Sy(Sy):
+    global camera
+    camera.Sy = Sy
 Sy = DoubleVar(value=1)
-slide_sy = Scale(menu_principal, from_=10, to=0, orient = VERTICAL, resolution = 0.1, variable = Sy)
+slide_sy = Scale(menu_principal, from_=10, to=0, orient = VERTICAL, resolution = 0.1, variable = Sy, command = ativar_Sy)
 slide_sy.place(x=0.78*largura, y=0.1*altura)
+
+def ativar_Steta(Steta):
+    global camera
+    camera.Steta = Steta
 Steta = DoubleVar(value=1)
-slide_st = Scale(menu_principal, from_=10, to=0, orient = VERTICAL, resolution = 0.1, variable = Steta)
+slide_st = Scale(menu_principal, from_=10, to=0, orient = VERTICAL, resolution = 0.1, variable = Steta, command = ativar_Steta)
 slide_st.place(x=0.85*largura, y=0.1*altura)
+
+
 
 # Creating a separate 3D figure
 fig0 = plt.figure()
@@ -137,21 +272,25 @@ ax0 = plt.axes(projection='3d')
 ax0.set_xlim([-5,5])
 ax0.set_ylim([-5,5])
 ax0.set_zlim([0,10])
+ax0.plot3D(house.points[0,:], house.points[1,:], house.points[2,:], 'black')
 e1m = np.array([1,0,0])  # eixos do referencial mundo
 e2m = np.array([0,1,0])
 e3m = np.array([0,0,1])
 e1o = np.array([1,0,0])  # eixos do referencial objeto
 e2o = np.array([0,1,0])
 e3o = np.array([0,0,1])
-Xo = 0
-Yo = 3
-Zo = 6
-ax0.quiver(0,0,0,e1m[0],e1m[1],e1m[2],color='red',pivot='tail',length=3)
-ax0.quiver(0,0,0,e2m[0],e2m[1],e2m[2],color='green',pivot='tail',length=3)
-ax0.quiver(0,0,0,e3m[0],e3m[1],e3m[2],color='blue',pivot='tail',length=3)
-ax0.quiver(Xo,Yo,Zo,e1o[0],e1o[1],e1o[2],color='red',pivot='tail',length=3)
-ax0.quiver(Xo,Yo,Zo,e2o[0],e2o[1],e2o[2],color='green',pivot='tail',length=3)
-ax0.quiver(Xo,Yo,Zo,e3o[0],e3o[1],e3o[2],color='blue',pivot='tail',length=3)
+Xo = house.Xw
+Yo = house.Yw
+Zo = house.Zw
+Xc = camera.Xw
+Yc = camera.Yw
+Zc = camera.Zw
+ax0.quiver(Xc,Yc,Zc,e1m[0],e1m[1],e1m[2],color='red',pivot='tail',length=1.5)
+ax0.quiver(Xc,Yc,Zc,e2m[0],e2m[1],e2m[2],color='green',pivot='tail',length=1.5)
+ax0.quiver(Xc,Yc,Zc,e3m[0],e3m[1],e3m[2],color='blue',pivot='tail',length=1.5)
+ax0.quiver(Xo,Yo,Zo,e1o[0],e1o[1],e1o[2],color='red',pivot='tail',length=1.5)
+ax0.quiver(Xo,Yo,Zo,e2o[0],e2o[1],e2o[2],color='green',pivot='tail',length=1.5)
+ax0.quiver(Xo,Yo,Zo,e3o[0],e3o[1],e3o[2],color='blue',pivot='tail',length=1.5)
 
 # Creating a separate 2D figure
 fig1 = plt.figure()
@@ -173,3 +312,4 @@ chart2_type.get_tk_widget().place(x=0.5*largura, y=0.3*altura)
 
 menu_principal.mainloop()
 
+plt.show()
