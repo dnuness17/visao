@@ -118,16 +118,20 @@ def transladar_action():
         if check_ambiente_var.get() == 1:
             camera.translate(vetor[0],vetor[1],vetor[2])
             plotar_3d()
+            plotar_2d()
         if check_proprio_var.get() == 1:
             camera.translate_own(vetor[0],vetor[1],vetor[2]) 
-            plotar_3d()   
+            plotar_3d()  
+            plotar_2d() 
     if check_objeto_var.get() == 1:
         if check_objeto_var.get() == 1:
             house.translate(vetor[0],vetor[1],vetor[2])
             plotar_3d()
+            plotar_2d()
         if check_proprio_var.get() == 1:
             house.translate_own(vetor[0],vetor[1],vetor[2]) 
-            plotar_3d()       
+            plotar_3d()  
+            plotar_2d()     
 
 transladar = Button(menu_principal, text = "Transladar  :", relief = "raised", command = transladar_action)
 transladar.place(x=0.3*largura, y=0.07*altura)
@@ -138,43 +142,55 @@ def rotacionar_action():
             if check_x_var.get() == 1:
                 camera.rotate_x(valor_R.get())
                 plotar_3d()
+                plotar_2d()
             if check_y_var.get() == 1:
                 camera.rotate_y(valor_R.get())
                 plotar_3d()
+                plotar_2d()
             if check_z_var.get() == 1:
                 camera.rotate_z(valor_R.get())
-                plotar_3d()    
+                plotar_3d()
+                plotar_2d()    
         if check_proprio_var.get() == 1:
             if check_x_var.get() == 1:
                 camera.rotate_x_own(valor_R.get())
                 plotar_3d()
+                plotar_2d()
             if check_y_var.get() == 1:
                 camera.rotate_y_own(valor_R.get())
                 plotar_3d()
+                plotar_2d()
             if check_z_var.get() == 1:
                 camera.rotate_z_own(valor_R.get())  
                 plotar_3d() 
+                plotar_2d()
     if check_objeto_var.get() == 1:
         if check_ambiente_var.get() == 1:
             if check_x_var.get() == 1:
                 house.rotate_x(valor_R.get())
                 plotar_3d()
+                plotar_2d()
             if check_y_var.get() == 1:
                 house.rotate_y(valor_R.get())
                 plotar_3d()
+                plotar_2d()
             if check_z_var.get() == 1:
                 house.rotate_z(valor_R.get()) 
-                plotar_3d()   
+                plotar_3d() 
+                plotar_2d()  
         if check_proprio_var.get() == 1:
             if check_x_var.get() == 1:
                 house.rotate_x_own(valor_R.get())
                 plotar_3d()
+                plotar_2d()
             if check_y_var.get() == 1:
                 house.rotate_y_own(valor_R.get())
                 plotar_3d()
+                plotar_2d()
             if check_z_var.get() == 1:
                 house.rotate_z_own(valor_R.get())  
                 plotar_3d() 
+                plotar_2d() 
 
 rotacionar = Button(menu_principal, text = "Rotacionar :", relief = "raised", command = rotacionar_action)
 rotacionar.place(x=0.3*largura, y=0.17*altura)
@@ -243,42 +259,48 @@ valor_rotacionar.place(x=0.3*largura, y=0.22*altura)
 # Escorrega
 def ativar_Ox(Ox):
     global camera
-    camera.Ox = Ox
+    camera.Ox = float(Ox)
+    plotar_2d()
 Ox = DoubleVar(value=camera.Ox)
 slide_ox = Scale(menu_principal, from_=1, to=-1, orient = VERTICAL, resolution = 0.1, variable = Ox, command = ativar_Ox)
 slide_ox.place(x=0.50*largura, y=0.1*altura)
 
 def ativar_Oy(Oy):
     global camera
-    camera.Oy = Oy
+    camera.Oy = float(Oy)
+    plotar_2d()
 Oy = DoubleVar(value=camera.Oy)
 slide_oy = Scale(menu_principal, from_=1, to=-1, orient = VERTICAL, resolution = 0.1, variable = Oy, command = ativar_Oy)
 slide_oy.place(x=0.57*largura, y=0.1*altura)
 
 def ativar_Fc(Fc):
     global camera
-    camera.f = Fc
+    camera.f = float(Fc)
+    plotar_2d()
 Fc = DoubleVar(value=camera.f)
 slide_fc = Scale(menu_principal, from_=100, to=1, orient = VERTICAL, resolution = 0.1, variable = Fc, command = ativar_Fc)
 slide_fc.place(x=0.64*largura, y=0.1*altura)
 
 def ativar_Sx(Sx):
     global camera
-    camera.Sx = Sx
+    camera.Sx = float(Sx)
+    plotar_2d()
 Sx = DoubleVar(value=1)
 slide_sx = Scale(menu_principal, from_=10, to=0, orient = VERTICAL, resolution = 0.1, variable = Sx, command = ativar_Sx)
 slide_sx.place(x=0.71*largura, y=0.1*altura)
 
 def ativar_Sy(Sy):
     global camera
-    camera.Sy = Sy
+    camera.Sy = float(Sy)
+    plotar_2d()
 Sy = DoubleVar(value=1)
 slide_sy = Scale(menu_principal, from_=10, to=0, orient = VERTICAL, resolution = 0.1, variable = Sy, command = ativar_Sy)
 slide_sy.place(x=0.78*largura, y=0.1*altura)
 
 def ativar_Steta(Steta):
     global camera
-    camera.Steta = Steta
+    camera.Steta = float(Steta)
+    plotar_2d()
 Steta = DoubleVar(value=1)
 slide_st = Scale(menu_principal, from_=10, to=0, orient = VERTICAL, resolution = 0.1, variable = Steta, command = ativar_Steta)
 slide_st.place(x=0.85*largura, y=0.1*altura)
@@ -315,6 +337,8 @@ def plotar_3d():
 
 def plotar_2d():
 
+    pontos_2d = camera.get_intrinsic_matrix()@camera.Mwc@house.Mwo@house.points
+
     # Creating a separate 2D figure
     fig1 = plt.figure()
     ax1 = plt.axes()
@@ -322,6 +346,7 @@ def plotar_2d():
     ax1.set_aspect('equal')
     ax1.set_xlim([-5,5])
     ax1.set_ylim([-5,5])
+    ax1.plot(pontos_2d[0,:], pontos_2d[1,:])
     #ax1.quiver(0,0,1,0,color='red',pivot='tail')
     #ax1.quiver(0,0,0,1,color='green',pivot='tail')
     chart2_type = FigureCanvasTkAgg(fig1, menu_principal)
