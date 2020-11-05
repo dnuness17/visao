@@ -108,57 +108,73 @@ label_st.place(x=0.866*largura, y=0.02*altura)
 # Buttons
 
 def transladar_action():
-    if check_x_var == 1:
-        vetor = np.array([valor_T,0,0])
-    if check_y_var == 1:
-        vetor = np.array([0,valor_T,0])
-    if check_z_var == 1:
-        vetor = np.array([0,0,valor_T])        
-    if check_camera_var == 1:
-        if check_ambiente_var == 1:
+    if check_x_var.get() == 1:
+        vetor = np.array([valor_T.get(),0,0])
+    if check_y_var.get() == 1:
+        vetor = np.array([0,valor_T.get(),0])
+    if check_z_var.get() == 1:
+        vetor = np.array([0,0,valor_T.get()])        
+    if check_camera_var.get() == 1:
+        if check_ambiente_var.get() == 1:
             camera.translate(vetor[0],vetor[1],vetor[2])
-        if check_propria_var == 1:
-            camera.translate_own(vetor[0],vetor[1],vetor[2])    
-    if check_objeto_var == 1:
-        if check_objeto_var == 1:
+            plotar_3d()
+        if check_proprio_var.get() == 1:
+            camera.translate_own(vetor[0],vetor[1],vetor[2]) 
+            plotar_3d()   
+    if check_objeto_var.get() == 1:
+        if check_objeto_var.get() == 1:
             house.translate(vetor[0],vetor[1],vetor[2])
-        if check_propria_var == 1:
-            house.translate_own(vetor[0],vetor[1],vetor[2])        
+            plotar_3d()
+        if check_proprio_var.get() == 1:
+            house.translate_own(vetor[0],vetor[1],vetor[2]) 
+            plotar_3d()       
 
 transladar = Button(menu_principal, text = "Transladar  :", relief = "raised", command = transladar_action)
 transladar.place(x=0.3*largura, y=0.07*altura)
 
 def rotacionar_action():      
-    if check_camera_var == 1:
-        if check_ambiente_var == 1:
-            if check_x_var == 1:
-                camera.rotate_x(valor_R)
-            if check_y_var == 1:
-                camera.rotate_y(valor_R)
-            if check_z_var == 1:
-                camera.rotate_z(valor_R)    
-        if check_propria_var == 1:
-            if check_x_var == 1:
-                camera.rotate_x_own(valor_R)
-            if check_y_var == 1:
-                camera.rotate_y_own(valor_R)
-            if check_z_var == 1:
-                camera.rotate_z_own(valor_R)   
-    if check_objeto_var == 1:
-        if check_ambiente_var == 1:
-            if check_x_var == 1:
-                house.rotate_x(valor_R)
-            if check_y_var == 1:
-                house.rotate_y(valor_R)
-            if check_z_var == 1:
-                house.rotate_z(valor_R)    
-        if check_propria_var == 1:
-            if check_x_var == 1:
-                house.rotate_x_own(valor_R)
-            if check_y_var == 1:
-                house.rotate_y_own(valor_R)
-            if check_z_var == 1:
-                house.rotate_z_own(valor_R)   
+    if check_camera_var.get() == 1:
+        if check_ambiente_var.get() == 1:
+            if check_x_var.get() == 1:
+                camera.rotate_x(valor_R.get())
+                plotar_3d()
+            if check_y_var.get() == 1:
+                camera.rotate_y(valor_R.get())
+                plotar_3d()
+            if check_z_var.get() == 1:
+                camera.rotate_z(valor_R.get())
+                plotar_3d()    
+        if check_proprio_var.get() == 1:
+            if check_x_var.get() == 1:
+                camera.rotate_x_own(valor_R.get())
+                plotar_3d()
+            if check_y_var.get() == 1:
+                camera.rotate_y_own(valor_R.get())
+                plotar_3d()
+            if check_z_var.get() == 1:
+                camera.rotate_z_own(valor_R.get())  
+                plotar_3d() 
+    if check_objeto_var.get() == 1:
+        if check_ambiente_var.get() == 1:
+            if check_x_var.get() == 1:
+                house.rotate_x(valor_R.get())
+                plotar_3d()
+            if check_y_var.get() == 1:
+                house.rotate_y(valor_R.get())
+                plotar_3d()
+            if check_z_var.get() == 1:
+                house.rotate_z(valor_R.get()) 
+                plotar_3d()   
+        if check_proprio_var.get() == 1:
+            if check_x_var.get() == 1:
+                house.rotate_x_own(valor_R.get())
+                plotar_3d()
+            if check_y_var.get() == 1:
+                house.rotate_y_own(valor_R.get())
+                plotar_3d()
+            if check_z_var.get() == 1:
+                house.rotate_z_own(valor_R.get())  
+                plotar_3d() 
 
 rotacionar = Button(menu_principal, text = "Rotacionar :", relief = "raised", command = rotacionar_action)
 rotacionar.place(x=0.3*largura, y=0.17*altura)
@@ -189,10 +205,13 @@ check_proprio_var = IntVar(value=0)
 check_proprio = Checkbutton(menu_principal, text="Próprio", variable = check_proprio_var, command = check_proprio_command)
 check_proprio.place(x=0.15*largura, y=0.08*altura)
 
+#chart1_type = FigureCanvasTkAgg(fig0, menu_principal)
+#chart1_type.get_tk_widget().place(x=-0.05*largura, y=0.3*altura)
 
 def check_x_command():
     check_y.deselect()
     check_z.deselect()
+
 check_x_var = IntVar(value=1)
 check_x = Checkbutton(menu_principal, text="x", variable = check_x_var, command = check_x_command)
 check_x.place(x=0.02*largura, y=0.16*altura)
@@ -264,52 +283,55 @@ Steta = DoubleVar(value=1)
 slide_st = Scale(menu_principal, from_=10, to=0, orient = VERTICAL, resolution = 0.1, variable = Steta, command = ativar_Steta)
 slide_st.place(x=0.85*largura, y=0.1*altura)
 
+def plotar_3d():
+    fig0 = plt.figure()
+    ax0 = plt.axes(projection='3d')
+    ax0.set_xlim([-5,5])
+    ax0.set_ylim([-5,5])
+    ax0.set_zlim([0,10])
+    pontos_aux = np.linalg.inv(house.Mwo)@house.points
+    ax0.plot3D(pontos_aux[0,:], pontos_aux[1,:], pontos_aux[2,:], 'black')
+    e1m = np.array([1,0,0])  # eixos do referencial mundo
+    e2m = np.array([0,1,0])
+    e3m = np.array([0,0,1])
+    e1o = np.array([1,0,0])  # eixos do referencial objeto
+    e2o = np.array([0,1,0])
+    e3o = np.array([0,0,1])
+    Xo = house.Xw
+    Yo = house.Yw
+    Zo = house.Zw
+    Xc = camera.Xw
+    Yc = camera.Yw
+    Zc = camera.Zw
+    ax0.quiver(Xc,Yc,Zc,e1m[0],e1m[1],e1m[2],color='red',pivot='tail',length=1.5)
+    ax0.quiver(Xc,Yc,Zc,e2m[0],e2m[1],e2m[2],color='green',pivot='tail',length=1.5)
+    ax0.quiver(Xc,Yc,Zc,e3m[0],e3m[1],e3m[2],color='blue',pivot='tail',length=1.5)
+    ax0.quiver(Xo,Yo,Zo,e1o[0],e1o[1],e1o[2],color='red',pivot='tail',length=1.5)
+    ax0.quiver(Xo,Yo,Zo,e2o[0],e2o[1],e2o[2],color='green',pivot='tail',length=1.5)
+    ax0.quiver(Xo,Yo,Zo,e3o[0],e3o[1],e3o[2],color='blue',pivot='tail',length=1.5)
 
+    chart1_type = FigureCanvasTkAgg(fig0, menu_principal)
+    chart1_type.get_tk_widget().place(x=-0.05*largura, y=0.3*altura)
 
-# Creating a separate 3D figure
-fig0 = plt.figure()
-ax0 = plt.axes(projection='3d')
-ax0.set_xlim([-5,5])
-ax0.set_ylim([-5,5])
-ax0.set_zlim([0,10])
-ax0.plot3D(house.points[0,:], house.points[1,:], house.points[2,:], 'black')
-e1m = np.array([1,0,0])  # eixos do referencial mundo
-e2m = np.array([0,1,0])
-e3m = np.array([0,0,1])
-e1o = np.array([1,0,0])  # eixos do referencial objeto
-e2o = np.array([0,1,0])
-e3o = np.array([0,0,1])
-Xo = house.Xw
-Yo = house.Yw
-Zo = house.Zw
-Xc = camera.Xw
-Yc = camera.Yw
-Zc = camera.Zw
-ax0.quiver(Xc,Yc,Zc,e1m[0],e1m[1],e1m[2],color='red',pivot='tail',length=1.5)
-ax0.quiver(Xc,Yc,Zc,e2m[0],e2m[1],e2m[2],color='green',pivot='tail',length=1.5)
-ax0.quiver(Xc,Yc,Zc,e3m[0],e3m[1],e3m[2],color='blue',pivot='tail',length=1.5)
-ax0.quiver(Xo,Yo,Zo,e1o[0],e1o[1],e1o[2],color='red',pivot='tail',length=1.5)
-ax0.quiver(Xo,Yo,Zo,e2o[0],e2o[1],e2o[2],color='green',pivot='tail',length=1.5)
-ax0.quiver(Xo,Yo,Zo,e3o[0],e3o[1],e3o[2],color='blue',pivot='tail',length=1.5)
+def plotar_2d():
 
-# Creating a separate 2D figure
-fig1 = plt.figure()
-ax1 = plt.axes()
-ax1.grid()
-ax1.set_aspect('equal')
-ax1.set_xlim([-5,5])
-ax1.set_ylim([-5,5])
-#ax1.quiver(0,0,1,0,color='red',pivot='tail')
-#ax1.quiver(0,0,0,1,color='green',pivot='tail')
+    # Creating a separate 2D figure
+    fig1 = plt.figure()
+    ax1 = plt.axes()
+    ax1.grid()
+    ax1.set_aspect('equal')
+    ax1.set_xlim([-5,5])
+    ax1.set_ylim([-5,5])
+    #ax1.quiver(0,0,1,0,color='red',pivot='tail')
+    #ax1.quiver(0,0,0,1,color='green',pivot='tail')
+    chart2_type = FigureCanvasTkAgg(fig1, menu_principal)
+    chart2_type.get_tk_widget().place(x=0.5*largura, y=0.3*altura)
 
 # Plot
 
-chart1_type = FigureCanvasTkAgg(fig0, menu_principal)
-chart1_type.get_tk_widget().place(x=-0.05*largura, y=0.3*altura)
-
-chart2_type = FigureCanvasTkAgg(fig1, menu_principal)
-chart2_type.get_tk_widget().place(x=0.5*largura, y=0.3*altura)
+plotar_3d()
+plotar_2d()
 
 menu_principal.mainloop()
 
-plt.show()
+#plt.show()

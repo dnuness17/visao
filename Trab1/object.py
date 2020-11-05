@@ -24,19 +24,19 @@ class Object:
         R = t.rotate_x(teta,degree)
         new_position = R @ self.get_position()
         self.set_position(new_position)
-        self.Mwo = self.Mwo @ np.inv(R)
+        self.Mwo = self.Mwo @ np.linalg.inv(R)
 
     def rotate_y(self,teta,degree=True):
         R = t.rotate_y(teta,degree)
         new_position = R @ self.get_position()
         self.set_position(new_position)
-        self.Mwo = self.Mwo @ np.inv(R)
+        self.Mwo = self.Mwo @ np.linalg.inv(R)
 
     def rotate_z(self,teta,degree=True):
         R = t.rotate_z(teta,degree)
         new_position = R @ self.get_position()
         self.set_position(new_position)
-        self.Mwo = self.Mwo @ np.inv(R)
+        self.Mwo = self.Mwo @ np.linalg.inv(R)
 
     def rotate_x_own(self,teta,degree=True):
         R = t.rotate_x(teta,degree)
@@ -54,14 +54,15 @@ class Object:
         T = t.translation(dx,dy,dz)
         new_position = T @ self.get_position()
         self.set_position(new_position)
-        self.Mwo = np.inv(T) @ self.Mwo 
+        self.Mwo = np.linalg.inv(T) @ self.Mwo 
+        #self.points = np.linalg.inv(self.Mwo)@self.points
 
     def translate_own(self,dx,dy,dz):
         T = t.translation(dx,dy,dz)
-        position_in_camera_frame = np.inv(self.Mwo) @ self.get_position()
+        position_in_camera_frame = np.linalg.inv(self.Mwo) @ self.get_position()
         new_position_in_camera_frame = T @ position_in_camera_frame
         new_position = self.Mwo @ new_position_in_camera_frame
         self.set_position(new_position)
-        self.Mwo = self.Mwo @ np.inv(T)
+        self.Mwo = self.Mwo @ np.linalg.inv(T)
     
     
