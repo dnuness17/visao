@@ -69,7 +69,7 @@ house = np.vstack([house, ones_line])
 # Transladar a casa para cima
 
 aux_house = t.translation(0,-0.4375,4)
-house = Object(0,-0.4375,4,np.linalg.inv(aux_house),aux_house@house)
+house = Object(0,-0.4375,4,np.linalg.inv(aux_house),house)
 
 # Criando camera
 
@@ -221,9 +221,6 @@ check_proprio_var = IntVar(value=0)
 check_proprio = Checkbutton(menu_principal, text="Próprio", variable = check_proprio_var, command = check_proprio_command)
 check_proprio.place(x=0.15*largura, y=0.08*altura)
 
-#chart1_type = FigureCanvasTkAgg(fig0, menu_principal)
-#chart1_type.get_tk_widget().place(x=-0.05*largura, y=0.3*altura)
-
 def check_x_command():
     check_y.deselect()
     check_z.deselect()
@@ -357,6 +354,6 @@ def plotar_2d():
 plotar_3d()
 plotar_2d()
 
-menu_principal.mainloop()
+#menu_principal.mainloop()
 
-#plt.show()
+plt.show()
