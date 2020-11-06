@@ -1,4 +1,4 @@
-# Import das bibliotecas 
+#%% Import das bibliotecas 
 import numpy as np
 from tkinter import *
 import matplotlib.pyplot as plt
@@ -7,6 +7,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import transformations as t
 from camera import Camera
 from object import Object
+import sys
+import os
 
 # Settings da janela de trabalho
 menu_principal = Tk()
@@ -19,57 +21,16 @@ posx = largura_screen/2 - largura/2
 posy = altura_screen/2 - altura/2 - 0.05*altura_screen
 menu_principal.geometry("%dx%d+%d+%d" % (largura,altura, posx, posy))
 
-# Criando objeto (casa)
 
-house = np.array([[0,         0,         0],
-         [6,  -10.0000,         0],
-         [6, -10.0000,   12.0000],
-         [6,  -10.4000,   11.5000],
-         [6,   -5.0000,   16.0000],
-         [6,         0,   12.0000],
-         [6,    0.5000,   11.4000],
-         [6,         0,   12.0000],
-         [6,         0,         0],
-  [-6.0000,         0,         0],
-  [-6.0000,   -5.0000,         0],
-  [-6.0000,  -10.0000,         0],
-         [6,  -10.0000,         0],
-         [6,  -10.0000,   12.0000],
-[-6.0000,  -10.0000,   12.0000],
-  [-6.0000,         0,   12.0000],
-         [6,         0,   12.0000],
-         [6,  -10.0000,   12.0000],
-         [6,  -10.5000,   11.4000],
-  [-6.0000,  -10.5000,   11.4000],
-  [-6.0000,  -10.0000,   12.0000],
-  [-6.0000,   -5.0000,   16.0000],
-         [6,   -5.0000,   16.0000],
-         [6,    0.5000,   11.4000],
-  [-6.0000,    0.5000,   11.4000],
-  [-6.0000,         0,   12.0000],
-  [-6.0000,   -5.0000,   16.0000],
-  [-6.0000,  -10.0000,   12.0000],
-  [-6.0000,  -10.0000,         0],
-  [-6.0000,   -5.0000,         0],
-  [-6.0000,         0,         0],
-  [-6.0000,         0,   12.0000],
-  [-6.0000,         0,         0]])
+folder = os.path.join(os.getcwd(),'Trab1')
+filepath = os.path.join(folder,'box.xyz')
+print('folder:',folder)
 
-house = np.transpose(house/12)
-
-#Representing the object in homogeneous coordinates
-#create row of ones
-num_columns = np.size(house,1)
-ones_line = np.ones(num_columns)
-
-
-#add to the house matrix to represent the house in homogeneous coordinates
-house = np.vstack([house, ones_line])
-
-# Transladar a casa para cima
-
-aux_house = t.translation(0,-0.4375,4)
-house = Object(0,-0.4375,4,np.linalg.inv(aux_house),house)
+# load points
+with open(filepath,'rb') as f:
+    box = np.loadtxt(f).T
+box = np.vstack((box,np.ones(box.shape[1])))
+box = Object(0,0,0,np.eye(4),box)
 
 # Criando camera
 
@@ -125,11 +86,11 @@ def transladar_action():
             plotar_2d() 
     if check_objeto_var.get() == 1:
         if check_objeto_var.get() == 1:
-            house.translate(vetor[0],vetor[1],vetor[2])
+            box.translate(vetor[0],vetor[1],vetor[2])
             plotar_3d()
             plotar_2d()
         if check_proprio_var.get() == 1:
-            house.translate_own(vetor[0],vetor[1],vetor[2]) 
+            box.translate_own(vetor[0],vetor[1],vetor[2]) 
             plotar_3d()  
             plotar_2d()     
 
@@ -167,28 +128,28 @@ def rotacionar_action():
     if check_objeto_var.get() == 1:
         if check_ambiente_var.get() == 1:
             if check_x_var.get() == 1:
-                house.rotate_x(valor_R.get())
+                box.rotate_x(valor_R.get())
                 plotar_3d()
                 plotar_2d()
             if check_y_var.get() == 1:
-                house.rotate_y(valor_R.get())
+                box.rotate_y(valor_R.get())
                 plotar_3d()
                 plotar_2d()
             if check_z_var.get() == 1:
-                house.rotate_z(valor_R.get()) 
+                box.rotate_z(valor_R.get()) 
                 plotar_3d() 
                 plotar_2d()  
         if check_proprio_var.get() == 1:
             if check_x_var.get() == 1:
-                house.rotate_x_own(valor_R.get())
+                box.rotate_x_own(valor_R.get())
                 plotar_3d()
                 plotar_2d()
             if check_y_var.get() == 1:
-                house.rotate_y_own(valor_R.get())
+                box.rotate_y_own(valor_R.get())
                 plotar_3d()
                 plotar_2d()
             if check_z_var.get() == 1:
-                house.rotate_z_own(valor_R.get())  
+                box.rotate_z_own(valor_R.get())  
                 plotar_3d() 
                 plotar_2d() 
 
@@ -312,12 +273,12 @@ def plotar_3d():
     ax0.set_xlabel('x')
     ax0.set_ylabel('y')
     ax0.set_zlabel('z')
-    pontos_aux = np.linalg.inv(house.Mwo)@house.points
+    pontos_aux = np.linalg.inv(box.Mwo)@box.points
     ax0.plot3D(pontos_aux[0,:], pontos_aux[1,:], pontos_aux[2,:], 'black')
 
     I = np.eye(4)[:,0:3]
     ec = camera.Mwc@I
-    eo = house.Mwo@I
+    eo = box.Mwo@I
 
     e1c = ec[0,:]  # eixos do referencial camera
     e2c = ec[1,:]
@@ -325,9 +286,9 @@ def plotar_3d():
     e1o = eo[0,:]  # eixos do referencial objeto
     e2o = eo[1,:]
     e3o = eo[2,:]
-    Xo = house.Xw
-    Yo = house.Yw
-    Zo = house.Zw
+    Xo = box.Xw
+    Yo = box.Yw
+    Zo = box.Zw
     Xc = camera.Xw
     Yc = camera.Yw
     Zc = camera.Zw
@@ -343,7 +304,7 @@ def plotar_3d():
 
 def plotar_2d():
     plt.close('all')
-    pontos_2d = camera.get_intrinsic_matrix()@np.linalg.inv(camera.Mwc)@house.Mwo@house.points
+    pontos_2d = camera.get_intrinsic_matrix()@np.linalg.inv(camera.Mwc)@box.Mwo@box.points
     pontos_2d = pontos_2d/pontos_2d[-1,:]
 
     # Creating a separate 2D figure
