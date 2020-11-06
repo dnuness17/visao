@@ -24,16 +24,12 @@ menu_principal.geometry("%dx%d+%d+%d" % (largura,altura, posx, posy))
 
 folder = os.path.join(os.getcwd(),'Trab1')
 filepath = os.path.join(folder,'box.xyz')
-print('folder:',folder)
-
-# load points
-with open(filepath,'rb') as f:
-    box = np.loadtxt(f).T
-box = np.vstack((box,np.ones(box.shape[1])))
-box = Object(0,0,0,np.eye(4),box)
+aux = np.loadtxt(filepath).T
+aux = np.vstack((aux,np.ones(aux.shape[1])))
+points = t.translation(0,0,-5.5) @ aux
+box = Object(0,0,5,t.translation(0,0,-5),points)
 
 # Criando camera
-
 global camera
 camera = Camera(0,0,1,1,0,14,0,0,0,np.eye(4))
 
@@ -267,6 +263,7 @@ def plotar_3d():
     plt.close('all')
     fig0 = plt.figure()
     ax0 = plt.axes(projection='3d')
+    ax0.view_init(elev=30,azim=-30)
     ax0.set_xlim([-5,5])
     ax0.set_ylim([-5,5])
     ax0.set_zlim([0,10])
@@ -274,7 +271,7 @@ def plotar_3d():
     ax0.set_ylabel('y')
     ax0.set_zlabel('z')
     pontos_aux = np.linalg.inv(box.Mwo)@box.points
-    ax0.plot3D(pontos_aux[0,:], pontos_aux[1,:], pontos_aux[2,:], 'black')
+    ax0.plot3D(pontos_aux[0,:], pontos_aux[1,:], pontos_aux[2,:], '.k')
 
     I = np.eye(4)[:,0:3]
     ec = camera.Mwc@I
@@ -314,7 +311,7 @@ def plotar_2d():
     ax1.set_aspect('equal')
     ax1.set_xlim([-5,5])
     ax1.set_ylim([-5,5])
-    ax1.plot(pontos_2d[0,:], pontos_2d[1,:])
+    ax1.plot(pontos_2d[0,:], pontos_2d[1,:],'.')
     #ax1.quiver(0,0,1,0,color='red',pivot='tail')
     #ax1.quiver(0,0,0,1,color='green',pivot='tail')
     chart2_type = FigureCanvasTkAgg(fig1, menu_principal)
