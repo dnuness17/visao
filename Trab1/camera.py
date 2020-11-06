@@ -49,9 +49,10 @@ class Camera:
 
     def set_position(self,P):
         assert(len(P) == 4)
-        self.Xw = P[0]
-        self.Yw = P[1]
-        self.Zw = P[2]
+        P = P.flatten()
+        self.Xw = P[0]/P[3]
+        self.Yw = P[1]/P[3]
+        self.Zw = P[2]/P[3]
 
     def rotate_x(self,teta,degree=True):
         R = t.rotate_x(teta,degree)
@@ -86,8 +87,10 @@ class Camera:
     def translate(self,dx,dy,dz):
         T = t.translation(dx,dy,dz)
         new_position = T @ self.get_position()
+        print(new_position)
         self.set_position(new_position)
         self.Mwc = np.linalg.inv(T) @ self.Mwc 
+        print(self.Mwc)
 
     def translate_own(self,dx,dy,dz):
         T = t.translation(dx,dy,dz)

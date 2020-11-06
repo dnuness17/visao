@@ -74,7 +74,7 @@ house = Object(0,-0.4375,4,np.linalg.inv(aux_house),house)
 # Criando camera
 
 global camera
-camera = Camera(0,0,1,1,0,1,0,0,0,np.eye(4))
+camera = Camera(0,0,1,1,0,14,0,0,0,np.eye(4))
 
 # Labels
 label_ref = Label(menu_principal, text = "Referêncial:")
@@ -303,28 +303,37 @@ slide_st = Scale(menu_principal, from_=10, to=0, orient = VERTICAL, resolution =
 slide_st.place(x=0.85*largura, y=0.1*altura)
 
 def plotar_3d():
+    plt.close('all')
     fig0 = plt.figure()
     ax0 = plt.axes(projection='3d')
     ax0.set_xlim([-5,5])
     ax0.set_ylim([-5,5])
     ax0.set_zlim([0,10])
+    ax0.set_xlabel('x')
+    ax0.set_ylabel('y')
+    ax0.set_zlabel('z')
     pontos_aux = np.linalg.inv(house.Mwo)@house.points
     ax0.plot3D(pontos_aux[0,:], pontos_aux[1,:], pontos_aux[2,:], 'black')
-    e1m = np.array([1,0,0])  # eixos do referencial mundo
-    e2m = np.array([0,1,0])
-    e3m = np.array([0,0,1])
-    e1o = np.array([1,0,0])  # eixos do referencial objeto
-    e2o = np.array([0,1,0])
-    e3o = np.array([0,0,1])
+
+    I = np.eye(4)[:,0:3]
+    ec = camera.Mwc@I
+    eo = house.Mwo@I
+
+    e1c = ec[0,:]  # eixos do referencial camera
+    e2c = ec[1,:]
+    e3c = ec[2,:]
+    e1o = eo[0,:]  # eixos do referencial objeto
+    e2o = eo[1,:]
+    e3o = eo[2,:]
     Xo = house.Xw
     Yo = house.Yw
     Zo = house.Zw
     Xc = camera.Xw
     Yc = camera.Yw
     Zc = camera.Zw
-    ax0.quiver(Xc,Yc,Zc,e1m[0],e1m[1],e1m[2],color='red',pivot='tail',length=1.5)
-    ax0.quiver(Xc,Yc,Zc,e2m[0],e2m[1],e2m[2],color='green',pivot='tail',length=1.5)
-    ax0.quiver(Xc,Yc,Zc,e3m[0],e3m[1],e3m[2],color='blue',pivot='tail',length=1.5)
+    ax0.quiver(Xc,Yc,Zc,e1c[0],e1c[1],e1c[2],color='red',pivot='tail',length=1.5)
+    ax0.quiver(Xc,Yc,Zc,e2c[0],e2c[1],e2c[2],color='green',pivot='tail',length=1.5)
+    ax0.quiver(Xc,Yc,Zc,e3c[0],e3c[1],e3c[2],color='blue',pivot='tail',length=1.5)
     ax0.quiver(Xo,Yo,Zo,e1o[0],e1o[1],e1o[2],color='red',pivot='tail',length=1.5)
     ax0.quiver(Xo,Yo,Zo,e2o[0],e2o[1],e2o[2],color='green',pivot='tail',length=1.5)
     ax0.quiver(Xo,Yo,Zo,e3o[0],e3o[1],e3o[2],color='blue',pivot='tail',length=1.5)
@@ -333,8 +342,9 @@ def plotar_3d():
     chart1_type.get_tk_widget().place(x=-0.05*largura, y=0.3*altura)
 
 def plotar_2d():
-
-    pontos_2d = camera.get_intrinsic_matrix()@camera.Mwc@house.Mwo@house.points
+    plt.close('all')
+    pontos_2d = camera.get_intrinsic_matrix()@np.linalg.inv(camera.Mwc)@house.Mwo@house.points
+    pontos_2d = pontos_2d/pontos_2d[-1,:]
 
     # Creating a separate 2D figure
     fig1 = plt.figure()
@@ -354,6 +364,6 @@ def plotar_2d():
 plotar_3d()
 plotar_2d()
 
-#menu_principal.mainloop()
+menu_principal.mainloop()
 
-plt.show()
+#plt.show()

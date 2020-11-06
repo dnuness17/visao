@@ -16,6 +16,7 @@ class Object:
 
     def set_position(self,P):
         assert(len(P) == 4)
+        P = P.flatten()
         self.Xw = P[0]
         self.Yw = P[1]
         self.Zw = P[2]
