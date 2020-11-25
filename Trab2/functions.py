@@ -3,20 +3,82 @@ import cv2 as cv
 from matplotlib import pyplot as plt
 import imutils
 
-def homography(src_points,dest_points):
+def homography(src_points,dest_points,s,t,p,e):
+
+    # RANSAC starting parameters
+    N = np.ceil(np.log10(1-p) / np.log10(1 - (1-e)**s),dtype='int32') # Number of iter.
+    T = (1-e)*N # desired percentage of inliers
+    best_S = None # best group of inliers
+    best_perc_inliers = 0 # best percentage of inliers
+    sample_count = 0
+
+    while N > sample_count:
+
+        # choose random points
+        chosen_index = np.random.randint(
+            low=0,
+            high=src_points.shape[0],
+            size=s
+        )
+
+        # pick random points
+        rand_src_points = src_points[chosen_index,:]
+        rand_dest_points = dest_points[chosen_index,:]
+        
+        H = calculate_dlt(rand_src_points,rand_dest_points)
+
+        proj_points = H @ src_points.T
+        proj_points = proj_points.T[:,:-1] # ignore last coordinate
+
+        # matrix with projection errors
+        diff = abs(proj_points - dest_points)
+
+        # only samples where both coordinates are less than t from true values
+        is_inlier = np.all(diff[diff < t],axis=1) 
+
+        best_perc = len(is_inlier)/src_points.shape[0]
+
+        if best_perc > best_perc_inliers:
+            best_perc_inliers = best_perc
+            best_S = (src_points[is_inlier,:],dest_points[is_inlier,:])
+
+        if 1-best_perc < e:
+            e = 1-best_perc
+            N = np.ceil(np.log10(1-p) / np.log10(1 - (1-e)**s),dtype='int32')
+        
+        sample_count += 1
+
+    # if conditions were found
+    H = calculate_dlt(src_points=best_S[0],dest_points=best_S[1])
+    return H
+         
+def calculate_dlt(src_points,dest_points):
+    A = []
+
     # normalize
     scaler_1 = Normalization()
     scaler_2 = Normalization()
-    norm_kp1 = scaler_1.fit_transform(src_points)
-    norm_kp2 = scaler_1.fit_transform(dest_points)
+    src_points = scaler_1.fit_transform(src_points)
+    dest_points = scaler_2.fit_transform(dest_points)
+    T_src = scaler_1.get_T()
+    T_dest = scaler_2.get_T()
 
-    
+    for i in range(src_points.shape[0]):
+        x = src_points[i,0]
+        y = src_points[i,1]
+        xl = dest_points[i,0]
+        yl = dest_points[i,1]
+        A.append(np.array([0,0,0,-xl,-yl,-1,yl*x,yl*y,yl]))
+        A.append(np.array([x,y,1,0,0,0,-xl*x,-xl*y,-xl]))
 
+    A = np.array(A)
+    _,_,V = np.linalg.svd(A)
+    last_line = V[-1,:]/V[-1,-1] # normalize by the last value
 
-
-## def dlt
-
-## def ransac
+    H = last_line.reshape(3,3)
+    H = np.linalg.inv(T_dest) @ H @ T_src
+    H = H/H[-1,-1]
+    return H
 
 class Normalization():
 
