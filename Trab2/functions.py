@@ -1,6 +1,8 @@
 import numpy as np
 import cv2 as cv
 from matplotlib import pyplot as plt
+import random
+from scipy.optimize import minimize, root, least_squares
 #import imutils
 
 def homography(src_points,dest_points,s,t,p,e):
@@ -86,6 +88,7 @@ def calculate_dlt(src_points,dest_points):
     H = H/H[-1,-1]
     return H
 
+
 class Normalization():
 
     def __init__(self):
@@ -149,3 +152,69 @@ class Normalization():
             ])
 
         return T2 @ T1
+
+def symmetric_transfer_error(H, src, dst):
+    H = H.reshape((3, 3))
+    H_inv = np.linalg.inv(H)
+  
+    dst_pred = np.dot(H, src)
+    src_pred = np.dot(H_inv, dst)
+
+    src_loss = np.linalg.norm((src_pred/src_pred[-1,:])-src, axis=0)
+    dst_loss = np.linalg.norm((dst_pred/dst_pred[-1,:])-dst, axis=0)
+    cost = src_loss + dst_loss
+    return cost 
+
+def optimize_ste(H_ini, src, dst):
+  
+    m1, n1 = src.shape
+    C = np.ones((m1,1))                              
+    src_new = np.transpose(np.concatenate((src,C),1)) 
+
+    m2, n2 = dst.shape
+    D = np.ones((m2,1))                              
+    dst_new = np.transpose(np.concatenate((dst,D),1))
+
+    res = root(symmetric_transfer_error, H_ini, args=(src_new, dst_new), method='lm', options={'xtol': 1e-08, 'maxiter': 5000})
+    H = res.x.reshape((3, 3))
+  
+    return H/H[-1,-1]       
+
+def reprojection_error (param, src, dst):
+
+    aux = param[0:9]
+    H = aux.reshape((3, 3))
+  
+    aux = param[9:param.shape[0]]
+    src_hat = aux.reshape((src.shape[1], 3)).T  # vector 3xN (N - number of points)
+  
+    dst_hat = np.dot(H,src_hat)
+
+    src_loss = np.linalg.norm((src_hat/src_hat[-1,:])-src, axis=0)
+    dst_loss = np.linalg.norm((dst_hat/dst_hat[-1,:])-dst, axis=0)
+    cost = src_loss + dst_loss
+  
+    return np.sum(cost)
+
+def optimize_min(P, src0, dst0):
+  
+    m1, n1 = src0.shape
+    C = np.ones((m1,1))
+    src = np.transpose(np.concatenate((src0,C),1)) 
+
+    m2, n2 = dst0.shape
+    D = np.ones((m2,1))                              
+    dst = np.transpose(np.concatenate((dst0,D),1))
+
+    res = minimize(reprojection_error, P.ravel(), method='Powell', args=(src, dst), options={'maxiter': 2000})  
+    #'Powell' 'CG' 'BFGS' 'L-BFGS-B' 'TNC' 'COBYLA' 'SLSQP'
+  
+    H = res.x[0:9].reshape((3, 3))
+    H = H/H[-1,-1]
+
+    aux = res.x[9:res.x.shape[0]]
+    src_hat = aux.reshape((src.shape[1], 3)).T
+    src_hat = src_hat/src_hat[-1,:]
+
+  
+    return H, src_hat
