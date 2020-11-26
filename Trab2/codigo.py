@@ -1,8 +1,11 @@
+#%%
 import numpy as np
 import cv2 as cv
 from matplotlib import pyplot as plt
-import imutils
+import functions as f
+#import imutils
 #from functions import homography
+
 
 MIN_MATCH_COUNT = 10
 img1 = cv.imread('comicsStarWars01.jpg',0) # queryImage
@@ -14,6 +17,7 @@ sift = cv.xfeatures2d.SIFT_create()
 
 kp1, des1 = sift.detectAndCompute(img1,None)
 kp2, des2 = sift.detectAndCompute(img2,None)
+
 
 FLANN_INDEX_KDTREE = 1
 index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
@@ -34,8 +38,20 @@ try:
 except AssertionError:
     raise AssertionError("Not enough matches are found - {}/{}".format(len(good), MIN_MATCH_COUNT))
 
-src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,2)
-dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,2)
+src_points = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,2)
+dest_points = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,2)
+
+
+t = 10                # true values 
+s = 4                 # Samples
+e = 0.80              # Outlier proportion
+p = 0.99              # Probability of outlier-free samples
+
+H = f.homography(src_points,dest_points,s,t,p,e)
+
+M, mask = cv.findHomography(src_points, dest_points, cv.RANSAC,5.0)
+
+#%%
 
 #homography(kp1,kp2)
 

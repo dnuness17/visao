@@ -1,12 +1,12 @@
 import numpy as np
 import cv2 as cv
 from matplotlib import pyplot as plt
-import imutils
+#import imutils
 
 def homography(src_points,dest_points,s,t,p,e):
 
     # RANSAC starting parameters
-    N = np.ceil(np.log10(1-p) / np.log10(1 - (1-e)**s),dtype='int32') # Number of iter.
+    N = np.ceil(np.log10(1-p) / np.log10(1 - (1-e)**s)) # Number of iter.
     T = (1-e)*N # desired percentage of inliers
     best_S = None # best group of inliers
     best_perc_inliers = 0 # best percentage of inliers
@@ -27,14 +27,20 @@ def homography(src_points,dest_points,s,t,p,e):
         
         H = calculate_dlt(rand_src_points,rand_dest_points)
 
-        proj_points = H @ src_points.T
-        proj_points = proj_points.T[:,:-1] # ignore last coordinate
+        m, n = src_points.shape
+        C = np.ones((m,1))                              
+        src_points_new = np.concatenate((src_points,C),1)  
+        proj_points = np.dot(H,np.transpose(src_points_new))
+
+        #proj_points = H @ src_points.T
+        proj_points = np.transpose(proj_points)[:,:-1] # ignore last coordinate
 
         # matrix with projection errors
         diff = abs(proj_points - dest_points)
 
         # only samples where both coordinates are less than t from true values
-        is_inlier = np.all(diff[diff < t],axis=1) 
+        #is_inlier = np.all(diff[diff < t]) 
+        is_inlier = np.all(diff < t,axis = 1) 
 
         best_perc = len(is_inlier)/src_points.shape[0]
 
@@ -44,7 +50,7 @@ def homography(src_points,dest_points,s,t,p,e):
 
         if 1-best_perc < e:
             e = 1-best_perc
-            N = np.ceil(np.log10(1-p) / np.log10(1 - (1-e)**s),dtype='int32')
+            N = np.ceil(np.log10(1-p) / np.log10(1 - (1-e)**s))
         
         sample_count += 1
 
@@ -111,7 +117,7 @@ class Normalization():
         # Function made for 2D points
 
         # check if fit was executed at least once
-        assert(x_centroid is not None)
+        assert(self.x_centroid is not None)
 
         T = self.get_T()
         inverse_points = np.linalg.inv(T) @ points.T
@@ -124,7 +130,7 @@ class Normalization():
         # transformation to normalize the points
 
         # check if fit was already executed
-        assert(x_centroid is not None)
+        assert(self.x_centroid is not None)
 
         # translation
         T1 = np.array(
