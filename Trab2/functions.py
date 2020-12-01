@@ -175,7 +175,12 @@ def optimize_ste(H_ini, src, dst):
     D = np.ones((m2,1))                              
     dst_new = np.transpose(np.concatenate((dst,D),1))
 
-    res = root(symmetric_transfer_error, H_ini, args=(src_new, dst_new), method='lm', options={'xtol': 1e-08, 'maxiter': 5000})
+    res = root(
+        symmetric_transfer_error, 
+        H_ini, 
+        args=(src_new, dst_new), 
+        method='lm', 
+        options={'xtol': 1e-08, 'maxiter': 5000})
     H = res.x.reshape((3, 3))
   
     return H/H[-1,-1]       
@@ -206,7 +211,12 @@ def optimize_min(P, src0, dst0):
     D = np.ones((m2,1))                              
     dst = np.transpose(np.concatenate((dst0,D),1))
 
-    res = minimize(reprojection_error, P.ravel(), method='Powell', args=(src, dst), options={'maxiter': 2000})  
+    res = minimize(
+        reprojection_error, 
+        P.ravel(), 
+        method='Powell', 
+        args=(src, dst), 
+        options={'maxiter': 2000})  
     #'Powell' 'CG' 'BFGS' 'L-BFGS-B' 'TNC' 'COBYLA' 'SLSQP'
   
     H = res.x[0:9].reshape((3, 3))

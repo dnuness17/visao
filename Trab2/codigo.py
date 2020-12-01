@@ -9,7 +9,7 @@ import functions as f
 
 t = 10                # true values 
 s = 4                 # Samples
-e = 0.80              # Outlier proportion
+e = 0.5               # Outlier proportion
 p = 0.99              # Probability of outlier-free samples
 
 MIN_MATCH_COUNT = 10
@@ -51,10 +51,13 @@ H = f.homography(src_points,dest_points,s,t,p,e)
 
 M, mask = cv.findHomography(src_points, dest_points, cv.RANSAC,5.0)
 
+#%%
 # Achando a matriz homogênea por otimizações
 
 # Symmetric_transfer_error
 O_ste = f.optimize_ste(H, src_points, dest_points)
+
+#%%
 
 # Reprojection_error
 
@@ -65,6 +68,8 @@ src_aux = np.concatenate((src_points,C),1)
 P = np.vstack((H,(src_aux)))   # Shape of P: (3+N) x 3.  P Contains the homography from Ransac and points of the first image
 R, src_hat = f.optimize_min(P, src_points, dest_points)
 
+#%%
+
 # OpenCV
 img3 = cv.warpPerspective(img2, np.linalg.inv(M), (img2.shape[1],img2.shape[0]))
 img4 = cv.warpPerspective(img1, M, (img1.shape[1],img1.shape[0]))
@@ -73,15 +78,20 @@ img4 = cv.warpPerspective(img1, M, (img1.shape[1],img1.shape[0]))
 img5 = cv.warpPerspective(img2, np.linalg.inv(H), (img2.shape[1],img2.shape[0]))
 img6 = cv.warpPerspective(img1, H, (img1.shape[1],img1.shape[0]))
 
+#%%
+
 # Otimização/Symmetric_transfer_error 
 img7 = cv.warpPerspective(img2, np.linalg.inv(O_ste), (img2.shape[1],img2.shape[0]))
 img8 = cv.warpPerspective(img1, O_ste, (img1.shape[1],img1.shape[0]))
+
+#%%
 
 # Otimização/Reprojection_error
 img9 = cv.warpPerspective(img2, np.linalg.inv(R), (img2.shape[1],img2.shape[0]))
 img10 = cv.warpPerspective(img1, R, (img1.shape[1],img1.shape[0]))
 
 # Plot das imagens geradas
+#%%
 
 fig = plt.figure(figsize=(30,10))
 ax1 = fig.add_subplot(5,2,1)
@@ -108,6 +118,18 @@ plt.imshow(img7, 'gray')
 ax1 = fig.add_subplot(5,2,8)
 plt.title('Primeira imagem após transformação usando Otimização 1')
 plt.imshow(img8, 'gray')
+
+#%%
+
+ax1 = fig.add_subplot(5,2,7)
+plt.title('Segunda imagem após transformação usando Otimização 1')
+plt.imshow(img7, 'gray')
+ax1 = fig.add_subplot(5,2,8)
+plt.title('Primeira imagem após transformação usando Otimização 1')
+plt.imshow(img8, 'gray')
+
+#%%
+
 ax1 = fig.add_subplot(5,2,9)
 plt.title('Segunda imagem após transformação usando Otimização 2')
 plt.imshow(img9, 'gray')
@@ -115,10 +137,10 @@ ax1 = fig.add_subplot(5,2,10)
 plt.title('Primeira imagem após transformação usando Otimização 2')
 plt.imshow(img10, 'gray')
 
-#fig1 = plt.figure(figsize=[20,40])
-#plt.imshow(img1, 'gray')
-#plt.plot(src_in[0,:],src_in[1,:],'.b')
-#plt.plot(src_hat[0,:],src_hat[1,:],'.r')
 
+
+#%%
 plt.show()
+
+
 # %%
