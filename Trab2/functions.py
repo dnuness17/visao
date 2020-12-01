@@ -5,11 +5,10 @@ import random
 from scipy.optimize import minimize, root, least_squares
 #import imutils
 
-def homography(src_points,dest_points,s,t,p,e):
+def homography(src_points,dest_points,scaler_1,scaler_2,s,t,p,e):
 
     # RANSAC starting parameters
     N = np.ceil(np.log10(1-p) / np.log10(1 - (1-e)**s)) # Number of iter.
-    T = (1-e)*N # desired percentage of inliers
     best_S = None # best group of inliers
     best_perc_inliers = 0 # best percentage of inliers
     sample_count = 0
@@ -27,15 +26,19 @@ def homography(src_points,dest_points,s,t,p,e):
         rand_src_points = src_points[chosen_index,:]
         rand_dest_points = dest_points[chosen_index,:]
         
-        H = calculate_dlt(rand_src_points,rand_dest_points)
+        H = calculate_dlt(
+            src_points=rand_src_points,
+            dest_points=rand_dest_points,
+            scaler_1=scaler_1,
+            scaler_2=scaler_1
+        )
 
         m, n = src_points.shape
         C = np.ones((m,1))                              
         src_points_new = np.concatenate((src_points,C),1)  
-        proj_points = np.dot(H,np.transpose(src_points_new))
-
-        #proj_points = H @ src_points.T
-        proj_points = np.transpose(proj_points)[:,:-1] # ignore last coordinate
+        proj_points = np.dot(H,np.transpose(src_points_new)).T
+        proj_points = proj_points / proj_points[:,-1].reshape(-1,1)
+        proj_points = proj_points[:,:-1] # ignore last coordinate
 
         # matrix with projection errors
         diff = abs(proj_points - dest_points)
@@ -44,30 +47,35 @@ def homography(src_points,dest_points,s,t,p,e):
         #is_inlier = np.all(diff[diff < t]) 
         is_inlier = np.all(diff < t,axis = 1) 
 
-        best_perc = len(is_inlier)/src_points.shape[0]
+        best_perc = sum(is_inlier)/src_points.shape[0]
 
         if best_perc > best_perc_inliers:
             best_perc_inliers = best_perc
             best_S = (src_points[is_inlier,:],dest_points[is_inlier,:])
 
-        if 1-best_perc < e:
-            e = 1-best_perc
-            N = np.ceil(np.log10(1-p) / np.log10(1 - (1-e)**s))
+        # e = 1-best_perc
+        # N = np.ceil(np.log10(1-p) / np.log10(1 - (1-e)**s))
+
+        if best_perc > 1-e:
+            break
         
         sample_count += 1
 
     # if conditions were found
-    H = calculate_dlt(src_points=best_S[0],dest_points=best_S[1])
+    H = calculate_dlt(
+        src_points=best_S[0],
+        dest_points=best_S[1],
+        scaler_1=scaler_1,
+        scaler_2=scaler_1
+    )
     return H
          
-def calculate_dlt(src_points,dest_points):
+def calculate_dlt(src_points,dest_points,scaler_1,scaler_2):
     A = []
 
     # normalize
-    scaler_1 = Normalization()
-    scaler_2 = Normalization()
-    src_points = scaler_1.fit_transform(src_points)
-    dest_points = scaler_2.fit_transform(dest_points)
+    src_points = scaler_1.transform(src_points)
+    dest_points = scaler_2.transform(dest_points)
     T_src = scaler_1.get_T()
     T_dest = scaler_2.get_T()
 
@@ -88,7 +96,6 @@ def calculate_dlt(src_points,dest_points):
     H = H/H[-1,-1]
     return H
 
-
 class Normalization():
 
     def __init__(self):
@@ -97,7 +104,7 @@ class Normalization():
         self.x_scale = None
         self.y_scale = None
 
-    def fit_transform(self,points):
+    def fit(self,points):
 
         # define centroid
         self.x_centroid = points[:,0].mean()
@@ -110,11 +117,16 @@ class Normalization():
         self.x_scale = np.mean(abs(centered_points[:,0]))
         self.y_scale = np.mean(abs(centered_points[:,1]))
 
-        normalized_points = centered_points / np.array([[self.x_scale,self.y_scale]])
+    def transform(self,points):
         ones = np.ones((points.shape[0],1),dtype='float64')
-
-        # return homogeneous coordinate points
-        return np.hstack((normalized_points,ones))
+        homogeneous_points = np.hstack((points,ones))
+        
+        aux = np.transpose(self.get_T() @ homogeneous_points.T)
+        return aux / aux[:,-1].reshape(-1,1)
+        
+    def fit_transform(self,points):
+        self.fit(points)
+        return self.transform(points)
 
     def inverse_transform(self,points):
         # Function made for 2D points
@@ -162,8 +174,8 @@ def symmetric_transfer_error(H, src, dst):
 
     src_loss = np.linalg.norm((src_pred/src_pred[-1,:])-src, axis=0)
     dst_loss = np.linalg.norm((dst_pred/dst_pred[-1,:])-dst, axis=0)
-    cost = src_loss + dst_loss
-    return cost 
+    cost = src_loss**2 + dst_loss**2
+    return sum(cost) 
 
 def optimize_ste(H_ini, src, dst):
   
@@ -175,12 +187,12 @@ def optimize_ste(H_ini, src, dst):
     D = np.ones((m2,1))                              
     dst_new = np.transpose(np.concatenate((dst,D),1))
 
-    res = root(
+    res = minimize(
         symmetric_transfer_error, 
-        H_ini, 
+        H_ini.flatten(), 
         args=(src_new, dst_new), 
-        method='lm', 
-        options={'xtol': 1e-08, 'maxiter': 5000})
+        method='Powell', 
+        options={'maxiter': 2000})
     H = res.x.reshape((3, 3))
   
     return H/H[-1,-1]       
