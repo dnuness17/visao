@@ -26,9 +26,10 @@ class Camera:
         # Matriz dos parâmetros extrínsecos
         auxE = data['extrinsic']['tf']['doubles']
         self.E = np.array([
-            [auxE[0],auxE[1],auxE[2]],
-            [auxE[3],auxE[4],auxE[5]],
-            [auxE[6],auxE[7],auxE[8]]
+            [auxE[0],auxE[1],auxE[2],auxE[3]],
+            [auxE[4],auxE[5],auxE[6],auxE[7]],
+            [auxE[8],auxE[9],auxE[10],auxE[11]],
+            [auxE[12],auxE[13],auxE[14],auxE[15]],
         ])
 
         # Closing file 
