@@ -62,37 +62,31 @@ while True:
     corners_0, ids, rejectedImgPoints = aruco.detectMarkers(gray_0, aruco_dict, parameters=parameters)
     #frame_markers = aruco.drawDetectedMarkers(img_0.copy(), corners, ids)
     #cv2.imshow('output', frame_markers)
-    
-    if aux_0 == 0:
-        print(corners_0)
-        aux_0 = 1
+
 
     gray_1 = cv2.cvtColor(img_1, cv2.COLOR_BGR2GRAY)
     corners_1, ids, rejectedImgPoints = aruco.detectMarkers(gray_1, aruco_dict, parameters=parameters)
     #frame_markers = aruco.drawDetectedMarkers(img_0.copy(), corners, ids)
     #cv2.imshow('output', frame_markers)
-    
-    if aux_1 == 0:
-        print(corners_1)
-        aux_1 = 1
+
 
     gray_2 = cv2.cvtColor(img_2, cv2.COLOR_BGR2GRAY)
     corners_2, ids, rejectedImgPoints = aruco.detectMarkers(gray_2, aruco_dict, parameters=parameters)
     #frame_markers = aruco.drawDetectedMarkers(img_0.copy(), corners, ids)
     #cv2.imshow('output', frame_markers)
-    
-    if aux_2 == 0:
-        print(corners_2)
-        aux_2 = 1    
+     
     
     gray_3 = cv2.cvtColor(img_3, cv2.COLOR_BGR2GRAY)
     corners_3, ids, rejectedImgPoints = aruco.detectMarkers(gray_3, aruco_dict, parameters=parameters)
     #frame_markers = aruco.drawDetectedMarkers(img_0.copy(), corners, ids)
     #cv2.imshow('output', frame_markers)
     
-    if aux_3 == 0:
-        print(corners_3)
-        aux_3 = 1
+
+    # Transformação dos pontos no plano pixelado para o plano métrico
+    corners_0_metrico = np.linalg.inv(cam0.I)@[corners_0[0][0][:,0],corners_0[0][0][:,1],np.array([1,1,1,1])]
+    corners_1_metrico = np.linalg.inv(cam1.I)@[corners_1[0][0][:,0],corners_1[0][0][:,1],np.array([1,1,1,1])]
+    corners_2_metrico = np.linalg.inv(cam2.I)@[corners_2[0][0][:,0],corners_2[0][0][:,1],np.array([1,1,1,1])]
+    corners_3_metrico = np.linalg.inv(cam3.I)@[corners_3[0][0][:,0],corners_3[0][0][:,1],np.array([1,1,1,1])]
 
     
     # Interrompe o ciclo quando o vídeo acaba
