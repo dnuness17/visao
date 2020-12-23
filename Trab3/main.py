@@ -3,6 +3,13 @@ import numpy as np
 from cv2 import aruco
 import matplotlib.pyplot as plt
 import sys
+from camera import Camera
+
+# Informação da calibração de cada câmera
+cam0 = Camera("Trab3/0.json")
+cam1 = Camera("Trab3/1.json")
+cam2 = Camera("Trab3/2.json")
+cam3 = Camera("Trab3/3.json")
 
 # Nome dos arquivos
 file_name_0 = "Trab3/camera-00.mp4" 
