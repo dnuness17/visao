@@ -25,25 +25,16 @@ class Camera:
 
         # Matriz dos parâmetros extrínsecos
         auxE = data['extrinsic']['tf']['doubles']
-        self.E = np.array([
+        E = np.array([
             [auxE[0],auxE[1],auxE[2],auxE[3]],
             [auxE[4],auxE[5],auxE[6],auxE[7]],
             [auxE[8],auxE[9],auxE[10],auxE[11]],
             [auxE[12],auxE[13],auxE[14],auxE[15]],
         ])
 
+        E = np.linalg.inv(E)
+        self.R = E[:3,:3]
+        self.T = E[:3,3].reshape(3,1)
+
         # Closing file 
         f.close() 
-
-    def distorcer(self,pontos):
-
-        # Passando ponto a ponto para aplicação da distorção
-        [a,b] = np.shape(pontos)    # tamanho da matriz de pontos
-        Md = np.zeros_like(pontos)  # matriz de zeros que serão adicionados os pontos já distorcidos posteriormente
-        for i in np.arange(0,a):
-            for j in np.arange(0,b):
-                mod = np.abs(pontos[i,j]) # módulo do ponto
-                # função de distorção
-                f = 1 + self.cd[0]*mod + self.cd[1]*mod**2 + self.cd[2]*mod**3 + self.cd[3]*mod**4 + self.cd[4]*mod**5  
-                Md[i,j] = f*pontos[i,j]
-        return Md
